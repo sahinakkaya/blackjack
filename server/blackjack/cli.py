@@ -1,112 +1,147 @@
-from pprint import pprint
-import requests
-
+import os
+from blackjack.models.game import Game
+from blackjack.models.player import Player
+from blackjack.schemas import PlayerCreate
 from blackjack.utils import print_cards_side_by_side
+from blackjack.utils import calculate_hand_value
+
+game = Game("1", num_of_decks=1)
+
+game.add_player(PlayerCreate(id="1", name="Alice", balance=1000))
+game.add_player(PlayerCreate(id="2", name="Bob", balance=1000))
 
 
-game_endpoint = "http://localhost:8000/new_api"
-
-# first_player_name = input("Enter first player name: ")
-# second_player_name = input("Enter second player name: ")
-# first_player_money = int(input(f"Enter {first_player_name}'s money: "))
-# second_player_money = int(input(f"Enter {second_player_name}'s money: "))
-
-first_player_name = "Alice"
-second_player_name = "Bob"
-first_player_money = 1000
-second_player_money = 1000
-
-game_id = 1
-
-response = requests.post(
-    f"{game_endpoint}/game?num_of_decks=1",
-)
-requests.post(
-    f"{game_endpoint}/game/{game_id}/player", json={"name": first_player_name, "balance": first_player_money}
-)
-requests.post(
-    f"{game_endpoint}/game/{game_id}/player", json={"name": second_player_name, "balance": second_player_money}
-)
+# game.start_game()
 
 
+def format_player(player: Player):
+    return f"{player.name} ({player.balance})"
 
 
-
-def place_bet(player_name, player_id):
-    bet = input(f"{player_name} enter your bet (press enter to skip this round): ")
-    while bet.isdigit():
-        response = requests.post(
-            f"{game_endpoint}/game/{game_id}/player/{player_id}/bet?bet_amount={bet}",
+def print_hand(hand, show_result=True):
+    if not hand:
+        return
+    print(hand.value, end=" ")
+    if show_result:
+        print(
+            "(busted)"
+            if hand.is_bust
+            else "(won)"
+            if hand.is_won()
+            else "(draw)"
+            if hand.is_draw()
+            else "(lost)",
         )
-        if response.json().get("error"):
-            print(response.json()["error"])
-        elif response.status_code == 200:
-            break
-        bet = input(f"{player_name} enter your bet (press enter to skip this round): ")
-    return bet
-
-
-def play_round(player, hand_idx, actions):
-    print('possible actions:', actions)
-    possible_actions = ", ".join([f"[{action[0]}]{action[1:]}" for action in actions])
-    single_letter_actions = [action[0] for action in actions]
-    single_letter_actions.append("")
-    action = input(f"{player['name']} enter your action ({possible_actions}): ")
-    while action not in single_letter_actions:
-        action = input(f"{player['name']} enter your action ({possible_actions}): ")
-    action = {
-        "h": "hit",
-        "s": "split",
-        "": "stand",
-        "d": "double_down",
-    }[action]
-    response = requests.post(
-        f"{game_endpoint}/game/{game_id}/player/{player['id']}/play?hand_idx={hand_idx}&action={action}", 
+    else:
+        print()
+    print_cards_side_by_side(
+        [c.model_dump() for c in hand.cards],
     )
-    game_status = requests.get(f"{game_endpoint}/game/{game_id}").json()
-    return game_status
 
 
 while True:
-    game_status = requests.get(f"{game_endpoint}/game/{game_id}").json()
-    while any(player["state"] == "betting" for player in game_status["players"].values()):
-        player = next(player for player in game_status["players"].values() if player["state"] == "betting")
-        place_bet(player["name"], player["id"])
-        game_status = requests.get(f"{game_endpoint}/game/{game_id}").json()
+    os.system("clear")
+    while game.is_accepting_bets():
+        current_player = game.current_player
+        bet = input(
+            f"{format_player(current_player)} enter your bet (press enter to skip this round): "
+        )
+        bet = "10"
+        while not bet.isdigit():
+            bet = input(
+                f"That didn't work. {format_player(current_player)} enter your bet (press enter to skip this round): "
+            )
+        game.accept_bet(current_player.id, int(bet))
 
-    while any(player["state"] == "playing" for player in game_status["players"].values()):
-        player = next(player for player in game_status["players"].values() if player["state"] == "playing")
-        pprint(game_status)
-        print(f"Dealer's hand: {game_status["dealer"]["value"]}")
-        print_cards_side_by_side(game_status["dealer"]["hand"])
-        while any(hand["state"] == "playing" for hand in player["hands"]):
-            hand = player["hands"][0]
-            other_hand = player["hands"][1] if len(player["hands"]) > 1 else None
-            print(f"{first_player_name}'s hand: {hand['value']}")
-            first_hand = True
-            print_cards_side_by_side(hand["cards"], is_current=hand["state"] == "playing")
-            if other_hand:
-                if hand["state"] != "playing" and other_hand["state"] == "playing":
-                    first_hand = False
-                print(f"{first_player_name}'s other hand: {other_hand['value']}")
-                print_cards_side_by_side(other_hand["cards"], is_current=hand["state"] != "playing" and other_hand["state"] == "playing")
+    while game.is_dealing():
+        current_player = game.current_player
+        while current_player and current_player.is_playing():
+            os.system("clear")
+            # print(game.as_dict())
+            print(f"Dealer's hand: {game.hand[0].value}")
+            print_cards_side_by_side([game.hand[0].model_dump(), {}])
+            current_hand = current_player.current_hand
 
-            actions = []
-            if first_hand:
-                actions = ["hit"]
-                if hand["can_double_down"]:
-                    actions.append("double")
-                if hand["can_split"]:
-                    actions.append("split")
-            elif other_hand:
-                actions = ["hit"]
-                if other_hand["can_double_down"]:
-                    actions.append("double")
-                if other_hand["can_split"]:
-                    actions.append("split")
-            game_status = play_round(player, 0 if first_hand else 1, actions)
-            pprint(game_status)
-            player = game_status["players"][str(player["id"])]
-        game_status = requests.get(f"{game_endpoint}/game/{game_id}").json()
-    input("Press enter to start next round: ")
-    requests.post(f"{game_endpoint}/game/{game_id}/next_round")
+            for player in game.players.values():
+                if not player.hands:
+                    continue
+                main_hand = player.main_hand
+                split_hand = player.split_hand
+                print(f"{player.name}'s hand: {main_hand.value}")
+                print_cards_side_by_side(
+                    [c.model_dump() for c in main_hand.cards],
+                    is_current=main_hand.is_playing()
+                    and player.id == current_player.id,
+                )
+                if split_hand:
+                    print(f"{player.name}'s other hand: {split_hand.value}")
+                    print_cards_side_by_side(
+                        [c.model_dump() for c in split_hand.cards],
+                        is_current=not main_hand.is_playing()
+                        and player.id == current_player.id
+                        and split_hand.is_playing(),
+                    )
+
+            actions = current_hand.actions
+            possible_actions = ", ".join(
+                [f"[{action[0]}]{action[1:]}" for action in actions]
+            )
+            single_letter_actions = [action[0] for action in actions]
+            single_letter_actions.append("")
+            action = input(
+                f"{current_player.name} enter your action ({possible_actions}): "
+            )
+            while action not in single_letter_actions:
+                action = input(
+                    f"{current_player.name} enter your action ({possible_actions}): "
+                )
+
+            action = {
+                "h": "hit",
+                "s": "split",
+                "": "stand",
+                "d": "double_down",
+            }[action]
+            game.play_turn(current_player.id, 0 if current_hand.is_main else 1, action)
+            current_player = game.current_player
+
+        if not game.is_end():
+            game.end()
+        print("ending roudn")
+
+        i = 2
+        while i < len(game.hand):
+            os.system("clear")
+            print(
+                f"Dealer's hand: {calculate_hand_value(game.hand[:i])}",
+            )
+            print_cards_side_by_side([c.model_dump() for c in game.hand[:i]])
+            for player in game.players.values():
+                if not player.hands:
+                    continue
+                print(format_player(player))
+                print_hand(player.main_hand, show_result=False)
+                print_hand(player.split_hand, show_result=False)
+            input()
+            i += 1
+
+        os.system("clear")
+        print(
+            f"Dealer's hand: {game.value}",
+            "(busted)" if game.is_bust else "",
+        )
+        print_cards_side_by_side([c.model_dump() for c in game.hand])
+        for player in game.players.values():
+            if not player.hands:
+                continue
+            print(format_player(player))
+            print_hand(player.main_hand)
+            print_hand(player.split_hand)
+        game.payout()
+        for player in game.players.values():
+            print(format_player(player))
+        input("press enter to continue")
+        os.system("clear")
+
+
+player = game.players[player_id]
