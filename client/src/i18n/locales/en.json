@@ -1,0 +1,51 @@
+{
+  "game": {
+    "state": {
+      "waiting_for_players" : "Waiting for players",
+      "accepting_bets" : "Accepting bets",
+      "paying_players" : "Paying players",
+      "dealing" : "Playing 1",
+      "playing" : "Playing 2",
+      "played" : "Played",
+      "end" : "Game over"
+    },
+    "player": {
+      "state": {
+        "waiting" : "Waiting",
+        "ready" : "Ready",
+        "betting" : "Betting...",
+        "playing" : "Playing..."
+      }
+    }
+  },
+  "form": {
+    "buttons": {
+      "create_room": "Create room",
+      "join_room": "Join existing room"
+    },
+    "labels": {
+      "name": "Name:",
+      "balance": "Balance:",
+      "room_id": "Room ID:",
+      "join_existing": "Join existing room"
+    },
+
+    "errors": {
+      "nameRequired": "Name is required",
+      "minLength": "Name should be at least {{count}} characters",
+      "maxLength": "Name should not exceed {{count}} characters",
+      "balanceRequired": "Balance is required",
+      "minBalance": "Minimum balance should be {{value}}",
+      "invalidBalance": "Invalid balance format. Enter a number with a maximum of 2 decimal places",
+      "roomIdRequired": "Room ID is required",
+      "invalidRoomId": "Invalid room ID"
+    }
+  },
+  "title": "Welcome {{name}}, to react using react-i18next fully type-safe",
+  "description": {
+    "part1": "This is a simple example.",
+    "part2": "😉"
+  },
+  "userMessagesUnread_one": "You have {{count}} unread message.",
+  "userMessagesUnread_other": "You have {{count}} unread messages."
+}

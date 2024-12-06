@@ -1,0 +1,52 @@
+{
+  "game": {
+    "state": {
+      "waiting_for_players" : "Oyuncular bekleniyor",
+      "accepting_bets" : "Bahisler alınıyor",
+      "paying_players" : "Oyunculara ödeme yapılıyor",
+      "dealing" : "Oynanıyor",
+      "playing" : "Oynanıyor 2",
+      "played" : "Oynandı",
+      "end" : "Oyun bitti"
+    },
+    "player": {
+      "state": {
+        "waiting" : "Bekliyor",
+        "ready" : "Hazır",
+        "betting" : "Bahis yapıyor...",
+        "playing" : "Oynuyor..."
+      }
+    }
+  },
+  "form": {
+    "buttons": {
+      "create_room": "Yeni oda oluştur",
+      "join_room": "Odaya katıl"
+    },
+    "labels": {
+      "name": "İsim:",
+      "balance": "Bakiye:",
+      "room_id": "Oda ID:",
+      "join_existing": "Mevcut odaya katıl"
+    },
+
+    "errors": {
+      "nameRequired": "İsim gerekli",
+      "minLength": "İsminiz en az {{count}} karakter olmalıdır",
+      "maxLength": "İsminiz {{count}} karakteri aşmamalıdır",
+      "balanceRequired": "Bakiye gerekli",
+      "minBalance": "Minimum bakiye {{value}} olmalıdır",
+      "invalidBalance": "Geçersiz bakiye formatı. En fazla 2 ondalık basamak içeren bir sayı girin",
+      "roomIdRequired": "Oda ID'si gerekli",
+      "invalidRoomId": "Geçersiz oda ID'si"
+ 
+    }
+  },
+  "title": "Welcome {{name}}, to react using react-i18next fully type-safe",
+  "description": {
+    "part1": "This is a simple example.",
+    "part2": "😉"
+  },
+  "userMessagesUnread_one": "You have {{count}} unread message.",
+  "userMessagesUnread_other": "You have {{count}} unread messages."
+}
