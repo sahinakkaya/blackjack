@@ -4,7 +4,7 @@ services:
     env_file:
       - .env.blackjack-frontend
     ports: 
-      - "8432:8000"
+      - "8432:3000"
     
 
   blackjack-backend:
@@ -12,4 +12,4 @@ services:
     env_file:
       - .env.blackjack-backend
     ports: 
-      - "8433:3000"
+      - "8433:8000"

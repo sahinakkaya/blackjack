@@ -39,6 +39,8 @@ jobs:
         with:
           context: client
           file: client/Dockerfile
+          build-args: |
+            REACT_APP_SOCKET_URL=https://blackjack-backend.sahinakkaya.dev
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -8,6 +8,8 @@ import { io } from 'socket.io-client';
 
 const socketWithoutTypes: Socket = io( process.env.REACT_APP_SOCKET_URL ?? 'http://localhost:8000');
 
+console.log('socket url', process.env.REACT_APP_SOCKET_URL);
+
 interface SocketEventsOn {
   [SocketOn.Connect]: () => void;
   [SocketOn.TableCreated]: (

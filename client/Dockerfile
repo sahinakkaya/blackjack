@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy package.json and yarn.lock to the working directory
 COPY package.json yarn.lock ./
 
+
+ARG REACT_APP_SOCKET_URL
+ENV REACT_APP_SOCKET_URL=$REACT_APP_SOCKET_URL
 # Install dependencies using Yarn
 RUN yarn install --frozen-lockfile
 
