@@ -3,15 +3,15 @@ on:
   workflow_dispatch:
   # schedule:
   #   - cron:  '38 19 * * *' # run the cron job every day at 19.38 
-  # push:
-  #   branches:
-  #     - "main"
-  #   tags-ignore:
-  #     - "**"
-  #   paths:
-  #     - "backend/**"
-  #     - ".github/workflows/**"
-  #     - ".github/actions/**"
+  push:
+    branches:
+      - "main"
+    tags-ignore:
+      - "**"
+    paths:
+      - "server/**"
+      - ".github/workflows/**"
+      - ".github/actions/**"
 env:
   REGISTRY: ghcr.io
 jobs:
