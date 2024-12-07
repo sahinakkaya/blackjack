@@ -1,8 +1,6 @@
 services:
   blackjack-frontend:
     image: ghcr.io/sahinakkaya/blackjack-frontend:main
-    env_file:
-      - .env.blackjack-frontend
     ports: 
       - "8432:3000"
     
@@ -10,6 +8,6 @@ services:
   blackjack-backend:
     image: ghcr.io/sahinakkaya/blackjack-backend:main
     env_file:
-      - .env.blackjack-backend
+      - .env.backend
     ports: 
       - "8433:8000"
