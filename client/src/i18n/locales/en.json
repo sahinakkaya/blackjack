@@ -18,6 +18,9 @@
       }
     }
   },
+  "actions": {
+    "set_bet": "Set Bet"
+  },
   "form": {
     "buttons": {
       "create_room": "Create room",
@@ -47,5 +50,9 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
-  "userMessagesUnread_other": "You have {{count}} unread messages."
+  "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "copy": {
+    "room_id_success": "Room ID successfully copied!",
+    "room_id_failed": "Failed to copy!"
+  }
 }

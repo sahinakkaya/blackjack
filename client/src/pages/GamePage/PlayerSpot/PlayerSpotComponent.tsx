@@ -58,14 +58,6 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
 
     return className.join(' ');
   }, [gameTable?.state, currentPlayer?.id, player?.id]);
-  const handleSetNewBet = () => {
-    if (
-      gameTable &&
-      gameTable?.state == GameStatus.accepting_bets
-    ) {
-      game.emit[SocketEmit.SetBet]();
-    }
-  };
 
   const handClass = (hand: IHand) => {
     const className = [];
@@ -88,7 +80,6 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
     <SpotWrapper className="spot">
       <Name>{player?.name}</Name>
       <SpotStyled
-        onClick={handleSetNewBet}
         className={spotClass}
       >
         {/*   soundType={SoundType.Chip} */}

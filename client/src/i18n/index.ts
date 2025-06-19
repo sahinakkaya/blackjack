@@ -8,8 +8,18 @@ i18next.use(initReactI18next).init({
   lng: 'tr', // if you're using a language detector, do not define the lng option
   debug: true,
   resources: {
-    en: en,
-    tr: tr,
+    en: {
+      game: en.game,
+      form: en.form,
+      copy: en.copy,
+      translation: en,
+    },
+    tr: {
+      game: tr.game,
+      form: tr.form,
+      copy: tr.copy,
+      translation: tr,
+    },
   },
   // if you see an error like: "Argument of type 'DefaultTFuncReturn' is not assignable to parameter of type xyz"
   // set returnNull to false (and also in the i18next.d.ts options)

@@ -18,6 +18,9 @@
       }
     }
   },
+  "actions": {
+    "set_bet": "Bahis Koy"
+  },
   "form": {
     "buttons": {
       "create_room": "Yeni oda oluştur",
@@ -48,5 +51,9 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
-  "userMessagesUnread_other": "You have {{count}} unread messages."
+  "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "copy": {
+    "room_id_success": "Oda ID'si başarıyla kopyalandı!",
+    "room_id_failed": "Kopyalama başarısız!"
+  }
 }

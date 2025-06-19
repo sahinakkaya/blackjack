@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ButtonsWrapper } from '../../../components/ModalsManager/ModalsManager.styled';
-import { ActionType, SocketEmit, SocketOn, SoundType } from '../../../types.ds';
+import { ActionType, SocketEmit, SocketOn, SoundType, GameStatus } from '../../../types.ds';
 import { StyledBtn } from '../../../components/App/App.styled';
 import { socket } from '../../../server/socket';
 import { game } from '../../../models/game';
@@ -11,6 +12,7 @@ import { StyledBtnWithSound } from '../../../sounds/StyledBtnWithSound';
 
 export const GameActionsComponent: React.FC = observer(() => {
   const { table } = game;
+  const { t } = useTranslation();
 
   const currentPlayer = game.table?.current_player;
   const isCurrentPlayer = currentPlayer?.id === game.clientId;
@@ -28,6 +30,12 @@ export const GameActionsComponent: React.FC = observer(() => {
     console.log(currentPlayer, actionType)
     game.emit[SocketEmit.Action](currentPlayer?.current_hand?.is_main ? 0 : 1, actionType);
     // setButtonsDisabled(true);
+  };
+
+  const handleSetBet = () => {
+    if (game.currentBetValue > 0) {
+      game.emit[SocketEmit.SetBet]();
+    }
   };
 
   useEffect(() => {
@@ -48,6 +56,27 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   console.log('game state is', game.table?.state)
   console.log('current hand is', currentHand)
+
+  const clientPlayer = game.getClientPlayer();
+  const isBettingPhase = game.table?.state === GameStatus.accepting_bets;
+  const hasPendingBet = game.currentBetValue > 0;
+  const hasPlacedBet = clientPlayer?.hands?.some(hand => hand.bet > 0) || false;
+  const canSetBet = isBettingPhase && clientPlayer && hasPendingBet && !hasPlacedBet;
+  console.log(isBettingPhase)
+
+  const bettingButtons = (
+    <ButtonsWrapper>
+      {canSetBet && (
+        <StyledBtnWithSound
+          soundType={SoundType.Click}
+          disabled={false}
+          onClick={handleSetBet}
+        >
+          {t('actions.set_bet')}
+        </StyledBtnWithSound>
+      )}
+    </ButtonsWrapper>
+  );
 
   const actionsButtons = (
     <ButtonsWrapper>
@@ -93,7 +122,7 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   return (
     <>
-      {actionsButtons}
+      {isBettingPhase ? bettingButtons : actionsButtons}
     </>
   );
 });

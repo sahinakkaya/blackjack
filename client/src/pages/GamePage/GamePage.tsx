@@ -15,7 +15,7 @@ import { GameActionsComponent } from './GameActions/GameActionsComponent';
 import { DealerSpotComponent } from './PlayerSpot/DealerSpotComponent';
 import { PlayerSpotComponent } from './PlayerSpot/PlayerSpotComponent';
 import { GameStatus, ModalTypes, SocketEmit, SoundType } from '../../types.ds';
-// import { SvgBtnWithSound } from '../../sounds/StyledBtnWithSound';
+import { SvgBtnWithSound } from '../../sounds/StyledBtnWithSound';
 import soundSettingsIcon from '../../assets/settings.svg';
 import { SpotsZone } from './PlayerSpot/Spot.styled';
 import moneyIcon from '../../assets/money.svg';
@@ -46,10 +46,10 @@ export const GamePage: React.FC = observer(() => {
     navigator.clipboard
       .writeText(game.table?.id ?? '')
       .then(() => {
-        toast('Table id successfully copied!', toastSettings);
+        toast(t('copy:room_id_success'), toastSettings);
       })
       .catch(() => {
-        toast.error('Failed to copy!', toastSettings);
+        toast.error(t('copy:room_id_failed'), toastSettings);
       });
   };
   const handleModalOpen = (type: ModalTypes) => () => {
@@ -67,7 +67,7 @@ export const GamePage: React.FC = observer(() => {
 
   );
 
-  const gameActionsComponent = (game.table?.state === GameStatus.dealing) && (
+  const gameActionsComponent = (game.table?.state === GameStatus.dealing || game.table?.state === GameStatus.accepting_bets) && (
     <GameActionsComponent />
   );
 
@@ -82,6 +82,16 @@ export const GamePage: React.FC = observer(() => {
       <div>{t(`game:state.${game.table.state}`)}</div>
     );
 
+  const copyTableIdBtn = (
+    <SvgBtnWithSound soundType={SoundType.Click} onClick={handleCopyClick}>
+      <HandySvg
+        src={copyIcon}
+        width={0.017 * Math.min(window.innerWidth, window.innerHeight)}
+        height={0.017 * Math.min(window.innerWidth, window.innerHeight)}
+      />
+    </SvgBtnWithSound>
+  );
+
   return (
     <Wrapper>
       <BalanceStyled>
@@ -89,6 +99,9 @@ export const GamePage: React.FC = observer(() => {
           (game.getClientPlayer()?.balance ?? 0) - game.currentBetValue :
           game.getClientPlayer()?.balance}</div>
       </BalanceStyled>
+      <OptionsPanel>
+        {copyTableIdBtn}
+      </OptionsPanel>
       <GameWrapper>
         <DealerSpotComponent />
         <GameText />
