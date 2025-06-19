@@ -10,6 +10,7 @@ type CardProps = {
   isNew: boolean;
   hidden?: boolean;
   cardholderId: string;
+  animationDelay?: number;
 };
 export const CardComponent: React.FC<CardProps> = ({
   suit,
@@ -18,6 +19,7 @@ export const CardComponent: React.FC<CardProps> = ({
   isNew,
   hidden,
   cardholderId,
+  animationDelay = 0,
 }) => {
   const shortRank = convertRank(rank);
   const deck = document.getElementById('deck');
@@ -80,6 +82,7 @@ export const CardComponent: React.FC<CardProps> = ({
       transition={{
         type: 'spring',
         duration: 1,
+        delay: animationDelay,
       }}
       animate={{ x: 0, y: 0, z: 0, rotate: 0 }}
     >
@@ -88,6 +91,7 @@ export const CardComponent: React.FC<CardProps> = ({
         transition={{
           type: 'spring',
           duration: 1,
+          delay: animationDelay,
         }}
         animate={{ rotateY: hidden ? 0 : 360 }}
         className={`face ${suit}`}
@@ -107,6 +111,7 @@ export const CardComponent: React.FC<CardProps> = ({
         transition={{
           type: 'spring',
           duration: 1,
+          delay: animationDelay,
         }}
         animate={{ rotateY: hidden ? 0 : 180 }}
         className="back"

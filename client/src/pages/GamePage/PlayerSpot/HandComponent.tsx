@@ -14,17 +14,22 @@ import { IHand, SocketEmit } from '../../../types.ds';
 import { game } from '../../../models/game';
 import { Bet } from '../BetPanel/Bet';
 import { getChips } from '../../../utils/convertToChips';
+import { useCardDelays } from '../../../hooks/useCardDelays';
+import { useProgressiveTotal } from '../../../hooks/useProgressiveTotal';
 
 type PlayerComponentProps = {
   hand: IHand;
   spotId: string;
   active: boolean;
+  playerIndex?: number;
 };
 export const HandComponent: React.FC<PlayerComponentProps> = observer(
-  ({ hand, spotId, active }) => {
+  ({ hand, spotId, active, playerIndex = 0 }) => {
 
     const cardRef = useRef<HTMLDivElement>(null);
     const activeClassName = active && hand.is_current_hand ? 'active' : '';
+    const { calculatePlayerDelay } = useCardDelays();
+    const { getVisibleTotal } = useProgressiveTotal(hand.cards, true, playerIndex, game.table?.state);
 
     const handleRemoveBet = useCallback(
       (index: number) => (e: MouseEvent<HTMLElement>) => {
@@ -61,19 +66,22 @@ export const HandComponent: React.FC<PlayerComponentProps> = observer(
               rank={card.rank}
               id={spotId}
               isNew={true}
+              animationDelay={calculatePlayerDelay(playerIndex, index)}
             />
           ))}
-          {hand.value > 0 && (
+          {getVisibleTotal().value > 0 && (
             <CardsTotal
               className={
-                hand.value > 21
+                getVisibleTotal().value > 21
                   ? 'bust'
-                  : hand.value == 21 && hand.cards.length == 2
+                  : getVisibleTotal().value == 21 && hand.cards.length == 2
                     ? 'bj'
                     : ''
               }
             >
-              {hand.alternate_value ? `${hand.alternate_value}/${hand.value}` : hand.value}
+              {(game.table?.state !== 'dealing' && game.table?.state !== 'accepting_bets') || !getVisibleTotal().alternate_value ? 
+                getVisibleTotal().value :
+                `${getVisibleTotal().alternate_value}/${getVisibleTotal().value}`}
             </CardsTotal>
           )}
         </CardsWrapper>

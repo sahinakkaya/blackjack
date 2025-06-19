@@ -35,16 +35,28 @@ interface TimerProps {
   duration: number; // Duration in seconds
   onTimeout: () => void;
   isActive: boolean;
+  delay?: number; // Delay before timer starts in seconds
 }
 
-export const Timer: React.FC<TimerProps> = ({ duration, onTimeout, isActive }) => {
+export const Timer: React.FC<TimerProps> = ({ duration, onTimeout, isActive, delay = 0 }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
+  const [isDelaying, setIsDelaying] = useState(delay > 0);
   const { t } = useTranslation();
 
   useEffect(() => {
     if (!isActive) {
       setTimeLeft(duration);
+      setIsDelaying(delay > 0);
       return;
+    }
+
+    // Handle delay first
+    if (delay > 0 && isDelaying) {
+      const delayTimer = setTimeout(() => {
+        setIsDelaying(false);
+        setTimeLeft(duration);
+      }, delay * 1000);
+      return () => clearTimeout(delayTimer);
     }
 
     if (timeLeft <= 0) {
@@ -64,19 +76,20 @@ export const Timer: React.FC<TimerProps> = ({ duration, onTimeout, isActive }) =
     }, 100);
 
     return () => clearInterval(timer);
-  }, [timeLeft, isActive, onTimeout, duration]);
+  }, [timeLeft, isActive, onTimeout, duration, delay, isDelaying]);
 
   // Reset timer when isActive changes to true
   useEffect(() => {
     if (isActive) {
       setTimeLeft(duration);
+      setIsDelaying(delay > 0);
     }
-  }, [isActive, duration]);
+  }, [isActive, duration, delay]);
 
   const progress = (timeLeft / duration) * 100;
   const isWarning = timeLeft <= 3; // Warning when 3 seconds or less
 
-  if (!isActive) {
+  if (!isActive || isDelaying) {
     return null;
   }
 
