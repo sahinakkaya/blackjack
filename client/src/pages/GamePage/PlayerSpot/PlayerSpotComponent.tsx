@@ -12,10 +12,11 @@ import {
   SpotWrapper,
   Name,
 } from './Spot.styled';
-import { GameStatus, HandStatus, IHand, PlayerGameState, SocketEmit, SoundType, TBet } from '../../../types.ds';
+import { GameStatus, HandStatus, IHand, PlayerGameState, SocketEmit, SoundType, TBet, ActionType } from '../../../types.ds';
 import { HandComponent } from './HandComponent';
 import { game } from '../../../models/game';
 import { useTranslation } from 'react-i18next';
+import { Timer } from '../GameActions/Timer';
 
 type PlayerProps = {
   id: number;
@@ -30,6 +31,24 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
   const gamePlayerIsActive = game.table?.state === GameStatus.accepting_bets ? player?.id === game.clientId : false;
   const isActive = game.table?.state == GameStatus.dealing ? currentPlayer?.id === player?.id : gamePlayerIsActive;
   const { t } = useTranslation();
+  
+  // Timer logic - show timer for the current player during dealing phase
+  const shouldShowTimer = game.table?.state === GameStatus.dealing && 
+                         currentPlayer?.id === player?.id && 
+                         currentPlayer?.current_hand?.can_hit;
+
+  // Create a unique key that changes when the hand changes (for timer reset)
+  // Include cards length so timer resets when player hits (gets new card)
+  const timerKey = `${currentPlayer?.id}-${currentPlayer?.current_hand?.id}-` +
+                   `${currentPlayer?.current_hand?.cards?.length}-${game.table?.state}`;
+
+  const handleTimerTimeout = useCallback(() => {
+    // Auto-stand when timer expires - only if this player is the current player and it's the client's player
+    if (isCurrentPlayer && currentPlayer?.current_hand?.can_hit) {
+      console.log('Timer expired for player, auto-standing');
+      game.emit[SocketEmit.Action](currentPlayer.current_hand.is_main ? 0 : 1, ActionType.Stand);
+    }
+  }, [isCurrentPlayer, currentPlayer]);
 
   const handleRemoveBet = useCallback(
     (bet: TBet) => (e: MouseEvent<HTMLElement>) => {
@@ -113,6 +132,14 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
             ))}
         </PlayersWrapper>
       </SpotStyled>
+      {shouldShowTimer && (
+        <Timer 
+          key={timerKey}
+          duration={4} 
+          onTimeout={handleTimerTimeout}
+          isActive={true}
+        />
+      )}
       {t(player.state === PlayerGameState.Playing && game?.table?.state === GameStatus.accepting_bets ?
         'game:player.state.ready' : `game:player.state.${player.state}`)}
     </SpotWrapper>

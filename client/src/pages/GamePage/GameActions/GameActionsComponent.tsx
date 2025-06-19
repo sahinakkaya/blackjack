@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,6 @@ import { StyledBtn } from '../../../components/App/App.styled';
 import { socket } from '../../../server/socket';
 import { game } from '../../../models/game';
 import { StyledBtnWithSound } from '../../../sounds/StyledBtnWithSound';
-import { Timer } from './Timer';
 
 export const GameActionsComponent: React.FC = observer(() => {
   const { table } = game;
@@ -17,7 +16,6 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   const currentPlayer = game.table?.current_player;
   const isCurrentPlayer = currentPlayer?.id === game.clientId;
-  const isDealingPhase = game.table?.state === GameStatus.dealing;
   // if (!currentTurn && game.table?.state === 'dealing') {
   //   console.log('Game ended because everyone made blackjack');
   //   game.emit[SocketEmit.EndGame]()
@@ -40,13 +38,6 @@ export const GameActionsComponent: React.FC = observer(() => {
     }
   };
 
-  const handleTimerTimeout = useCallback(() => {
-    // Auto-stand when timer expires
-    if (isCurrentPlayer && currentPlayer?.current_hand?.can_hit) {
-      console.log('Timer expired, auto-standing');
-      game.emit[SocketEmit.Action](currentPlayer.current_hand.is_main ? 0 : 1, ActionType.Stand);
-    }
-  }, [isCurrentPlayer, currentPlayer]);
 
   useEffect(() => {
     if (!isCurrentPlayer) {
@@ -132,13 +123,6 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   return (
     <>
-      {isDealingPhase && isCurrentPlayer && currentHand?.can_hit && (
-        <Timer 
-          duration={4} 
-          onTimeout={handleTimerTimeout}
-          isActive={true}
-        />
-      )}
       {isBettingPhase ? bettingButtons : actionsButtons}
     </>
   );
