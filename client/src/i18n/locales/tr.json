@@ -52,6 +52,12 @@
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
   "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "notifications": {
+    "player_joined": "{{playerName}} oyuna katıldı"
+  },
+  "timer": {
+    "time_left": "Kalan süre"
+  },
   "copy": {
     "room_id_success": "Oda ID'si başarıyla kopyalandı!",
     "room_id_failed": "Kopyalama başarısız!"

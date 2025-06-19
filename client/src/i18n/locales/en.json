@@ -51,6 +51,12 @@
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
   "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "notifications": {
+    "player_joined": "{{playerName}} joined the game"
+  },
+  "timer": {
+    "time_left": "Time left"
+  },
   "copy": {
     "room_id_success": "Room ID successfully copied!",
     "room_id_failed": "Failed to copy!"

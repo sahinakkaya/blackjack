@@ -57,7 +57,7 @@ export const GamePage: React.FC = observer(() => {
   };
 
   const spotsZone = (
-    <SpotsZone >
+    <SpotsZone $playerCount={game.table?.players.length || 5}>
       {
         Array.from({ length: game.table?.players.length || 5 }).map((_, index) => (
           <PlayerSpotComponent key={index} id={index} />

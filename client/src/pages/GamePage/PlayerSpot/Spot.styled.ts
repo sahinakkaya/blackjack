@@ -98,10 +98,10 @@ export const Name = styled.div`
   top: 0;
 `;
 
-export const SpotsZone = styled.div`
+export const SpotsZone = styled.div<{ $playerCount?: number; }>`
   display: flex;
   width: 94%;
-  justify-content: space-between;
+  justify-content: ${props => props.$playerCount === 1 ? 'center' : 'space-between'};
   // .spot {
   //   transform: rotate(calc(90deg - 45deg * var(--i)));
   //   &:nth-child(1) {

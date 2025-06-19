@@ -8,6 +8,8 @@ import { ITable, IModal, ModalTypes } from '../types.ds';
 import { SoundType, TBet } from '../types.ds';
 import { socket } from '../server/socket';
 import { Music } from './music';
+import { toast } from 'react-toastify';
+import i18next from 'i18next';
 
 
 export class Game {
@@ -51,6 +53,8 @@ export class Game {
       socket.emit(SocketEmit.EndGame, this.table?.id);
     }
   };
+
+  private previousPlayerCount: number = 0;
 
   public constructor() {
 
@@ -158,6 +162,21 @@ export class Game {
   }
 
   @action.bound private updateTable(table: ITable): void {
+    // Check for new players joining
+    if (this.table && table.players.length > this.previousPlayerCount) {
+      // Find newly joined players
+      const currentPlayerIds = this.table.players.map(p => p.id);
+      const newPlayers = table.players.filter(p => !currentPlayerIds.includes(p.id));
+      
+      // Show notification for each new player (excluding the current client)
+      newPlayers.forEach(player => {
+        if (player.id !== this.clientId) {
+          toast.success(i18next.t('notifications.player_joined', { playerName: player.name }));
+        }
+      });
+    }
+    
+    this.previousPlayerCount = table.players.length;
     this.table = table;
   }
 }
