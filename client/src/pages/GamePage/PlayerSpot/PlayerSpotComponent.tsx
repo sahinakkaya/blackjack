@@ -39,23 +39,28 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
     if (!game.table?.players) {
       return true;
     }
-    
+
     // If any player has more than 2 cards, we're past initial dealing
-    return game.table.players.every(player => 
-      player.hands.every(hand => hand.cards.length <= 2)
+    return game.table.players.every(player =>
+      player.hands.every(hand => {
+        const isTwoCardBlackjack = hand.cards.length === 2 && hand.value === 21;
+        return hand.cards.length <= 1 &&
+          (hand.state !== HandStatus.played || isTwoCardBlackjack) &&
+          hand.is_main !== false; // exclude split hands
+      })
     );
   }, [game.table?.players]);
 
   // Timer logic - show timer for the current player during dealing phase
   // But only after all cards are dealt
-  const shouldShowTimer = game.table?.state === GameStatus.dealing && 
-                         currentPlayer?.id === player?.id && 
-                         currentPlayer?.current_hand?.can_hit;
+  const shouldShowTimer = game.table?.state === GameStatus.dealing &&
+    currentPlayer?.id === player?.id &&
+    currentPlayer?.current_hand?.can_hit;
 
   // Create a unique key that changes when the hand changes (for timer reset)
   // Include cards length so timer resets when player hits (gets new card)
   const timerKey = `${currentPlayer?.id}-${currentPlayer?.current_hand?.id}-` +
-                   `${currentPlayer?.current_hand?.cards?.length}-${game.table?.state}`;
+    `${currentPlayer?.current_hand?.cards?.length}-${game.table?.state}`;
 
   const handleTimerTimeout = useCallback(() => {
     // Auto-stand when timer expires - only if this player is the current player and it's the client's player
@@ -148,9 +153,9 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
         </PlayersWrapper>
       </SpotStyled>
       {shouldShowTimer && (
-        <Timer 
+        <Timer
           key={timerKey}
-          duration={4} 
+          duration={4}
           onTimeout={handleTimerTimeout}
           isActive={true}
           delay={isInitialDealing ? calculateAllCardsDealtTime() : 0}

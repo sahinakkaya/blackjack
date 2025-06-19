@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ButtonsWrapper } from '../../../components/ModalsManager/ModalsManager.styled';
-import { ActionType, SocketEmit, SocketOn, SoundType, GameStatus } from '../../../types.ds';
+import { ActionType, SocketEmit, SocketOn, SoundType, GameStatus, HandStatus } from '../../../types.ds';
 import { StyledBtn } from '../../../components/App/App.styled';
 import { socket } from '../../../server/socket';
 import { game } from '../../../models/game';
@@ -22,10 +22,15 @@ export const GameActionsComponent: React.FC = observer(() => {
     if (!game.table?.players) {
       return true;
     }
-    
+
     // If any player has more than 2 cards, we're past initial dealing
-    return game.table.players.every(player => 
-      player.hands.every(hand => hand.cards.length <= 2)
+    return game.table.players.every(player =>
+      player.hands.every(hand => {
+        const isTwoCardBlackjack = hand.cards.length === 2 && hand.value === 21;
+        return hand.cards.length <= 1 &&
+          (hand.state !== HandStatus.played || isTwoCardBlackjack) &&
+          hand.is_main !== false; // exclude split hands
+      })
     );
   }, [game.table?.players]);
 
@@ -75,7 +80,7 @@ export const GameActionsComponent: React.FC = observer(() => {
       const dealingTimeout = setTimeout(() => {
         setIsWaitingForDealing(false);
       }, calculateAllCardsDealtTime() * 1000);
-      
+
       return () => clearTimeout(dealingTimeout);
     } else {
       setIsWaitingForDealing(false);
