@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { StyledBtn } from '../../../components/App/App.styled';
 import { socket } from '../../../server/socket';
 import { game } from '../../../models/game';
 import { StyledBtnWithSound } from '../../../sounds/StyledBtnWithSound';
+import { useInitialDealingState } from '../../../hooks/useInitialDealingState';
 
 export const GameActionsComponent: React.FC = observer(() => {
   const { table } = game;
@@ -16,31 +17,7 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   const currentPlayer = game.table?.current_player;
   const isCurrentPlayer = currentPlayer?.id === game.clientId;
-
-  // Check if this is initial dealing (all players have exactly 2 cards) vs player actions
-  const isInitialDealing = useMemo(() => {
-    if (!game.table?.players) {
-      return true;
-    }
-
-    // If any player has more than 2 cards, we're past initial dealing
-    return game.table.players.every(player =>
-      player.hands.every(hand => {
-        const isTwoCardBlackjack = hand.cards.length === 2 && hand.value === 21;
-        return hand.cards.length <= 1 &&
-          (hand.state !== HandStatus.played || isTwoCardBlackjack) &&
-          hand.is_main !== false; // exclude split hands
-      })
-    );
-  }, [game.table?.players]);
-
-  // Calculate when all cards are dealt (based on dealing sequence delays)
-  const calculateAllCardsDealtTime = () => {
-    const totalPlayers = game.table?.players.length || 1;
-    const cardDelay = 0.8; // seconds between each card
-    // Total time: all players get 2 cards + dealer gets 2 cards
-    return (totalPlayers * 2 + 2) * cardDelay;
-  };
+  const { shouldWaitForInitialDealing, dealingDelayTime } = useInitialDealingState();
   // if (!currentTurn && game.table?.state === 'dealing') {
   //   console.log('Game ended because everyone made blackjack');
   //   game.emit[SocketEmit.EndGame]()
@@ -75,17 +52,17 @@ export const GameActionsComponent: React.FC = observer(() => {
 
   // Handle initial dealing delay
   useEffect(() => {
-    if (game.table?.state === GameStatus.dealing && isInitialDealing && isCurrentPlayer) {
+    if (game.table?.state === GameStatus.dealing && shouldWaitForInitialDealing && isCurrentPlayer) {
       setIsWaitingForDealing(true);
       const dealingTimeout = setTimeout(() => {
         setIsWaitingForDealing(false);
-      }, calculateAllCardsDealtTime() * 1000);
+      }, dealingDelayTime * 1000);
 
       return () => clearTimeout(dealingTimeout);
     } else {
       setIsWaitingForDealing(false);
     }
-  }, [game.table?.state, isInitialDealing, isCurrentPlayer]);
+  }, [game.table?.state, shouldWaitForInitialDealing, isCurrentPlayer, dealingDelayTime]);
 
   useEffect(() => {
     socket.on(SocketOn.ActionMade, (data) => {

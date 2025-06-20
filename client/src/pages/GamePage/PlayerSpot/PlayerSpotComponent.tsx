@@ -17,7 +17,7 @@ import { HandComponent } from './HandComponent';
 import { game } from '../../../models/game';
 import { useTranslation } from 'react-i18next';
 import { Timer } from '../GameActions/Timer';
-import { useCardDelays } from '../../../hooks/useCardDelays';
+import { useInitialDealingState } from '../../../hooks/useInitialDealingState';
 
 type PlayerProps = {
   id: number;
@@ -32,24 +32,7 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
   const gamePlayerIsActive = game.table?.state === GameStatus.accepting_bets ? player?.id === game.clientId : false;
   const isActive = game.table?.state == GameStatus.dealing ? currentPlayer?.id === player?.id : gamePlayerIsActive;
   const { t } = useTranslation();
-  const { calculateAllCardsDealtTime } = useCardDelays();
-
-  // Check if this is initial dealing (all players have exactly 2 cards) vs player actions
-  const isInitialDealing = useMemo(() => {
-    if (!game.table?.players) {
-      return true;
-    }
-
-    // If any player has more than 2 cards, we're past initial dealing
-    return game.table.players.every(player =>
-      player.hands.every(hand => {
-        const isTwoCardBlackjack = hand.cards.length === 2 && hand.value === 21;
-        return hand.cards.length <= 1 &&
-          (hand.state !== HandStatus.played || isTwoCardBlackjack) &&
-          hand.is_main !== false; // exclude split hands
-      })
-    );
-  }, [game.table?.players]);
+  const { shouldWaitForInitialDealing, dealingDelayTime } = useInitialDealingState();
 
   // Timer logic - show timer for the current player during dealing phase
   // But only after all cards are dealt
@@ -158,7 +141,7 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
           duration={4}
           onTimeout={handleTimerTimeout}
           isActive={true}
-          delay={isInitialDealing ? calculateAllCardsDealtTime() : 0}
+          delay={shouldWaitForInitialDealing ? dealingDelayTime : 0}
         />
       )}
       {t(player.state === PlayerGameState.Playing && game?.table?.state === GameStatus.accepting_bets ?
