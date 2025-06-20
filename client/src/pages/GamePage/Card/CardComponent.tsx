@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 
-import { CardholdersIds, Rank, Suit, SuitCard } from '../../../types.ds';
+import { CardholdersIds, Rank, Suit, SuitCard, SoundType } from '../../../types.ds';
 import { CardStyled, CardWrap } from './Card.styled';
+import { game } from '../../../models/game';
 
 type CardProps = {
   suit: Suit;
@@ -24,6 +25,37 @@ export const CardComponent: React.FC<CardProps> = ({
   const shortRank = convertRank(rank);
   const deck = document.getElementById('deck');
   const card = document.getElementById(cardholderId);
+
+  // Play flip sound when card animation starts (after delay)
+  useEffect(() => {
+    let soundTimeout: NodeJS.Timeout | null = null;
+    
+    if (isNew) {
+      const playSound = () => {
+        try {
+          // Add a small random delay to prevent audio conflicts when multiple cards play at once
+          const randomOffset = Math.random() * 50; // 0-50ms random offset
+          setTimeout(() => {
+            game.playSound(SoundType.Flip);
+          }, randomOffset);
+        } catch (error) {
+          console.debug('Audio play failed:', error);
+        }
+      };
+
+      if (animationDelay > 0) {
+        soundTimeout = setTimeout(playSound, animationDelay * 1000);
+      } else {
+        playSound();
+      }
+    }
+    
+    return () => {
+      if (soundTimeout) {
+        clearTimeout(soundTimeout);
+      }
+    };
+  }, [isNew, animationDelay]);
 
   const initialOffset = useMemo(() => {
     if (!deck?.firstElementChild || !card) {
