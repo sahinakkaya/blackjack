@@ -21,6 +21,10 @@ export const DealerSpotComponent: React.FC = observer(() => {
         {hand?.map((card, index) => {
           // Hide hole card (second card) only during dealing phase
           const isHoleCard = index === 1 && isDealing;
+          
+          // Determine if this is truly a new card (for sound/animation)
+          const isTrulyNewCard = isDealing || index >= 2; // New during dealing, or additional cards after dealing
+          
           // Determine animation delay:
           // - During dealing: use delay for all cards
           // - After dealing: no delay for hole card reveal (index 1), but delay for additional cards (index >= 2)
@@ -43,7 +47,7 @@ export const DealerSpotComponent: React.FC = observer(() => {
               suit={card.suit}
               rank={card.rank}
               id={index.toString()}
-              isNew={true}
+              isNew={isTrulyNewCard}
               animationDelay={getAnimationDelay()}
             />
           );
