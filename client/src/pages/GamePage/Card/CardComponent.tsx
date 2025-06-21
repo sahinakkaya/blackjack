@@ -29,7 +29,7 @@ export const CardComponent: React.FC<CardProps> = ({
   // Play flip sound when card animation starts (after delay)
   useEffect(() => {
     let soundTimeout: NodeJS.Timeout | null = null;
-    
+
     if (isNew) {
       const playSound = () => {
         try {
@@ -49,7 +49,7 @@ export const CardComponent: React.FC<CardProps> = ({
         playSound();
       }
     }
-    
+
     return () => {
       if (soundTimeout) {
         clearTimeout(soundTimeout);

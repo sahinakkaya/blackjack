@@ -6,7 +6,8 @@ export const useProgressiveTotal = (
   cards: any[] | undefined,
   isPlayer: boolean,
   playerIndex?: number,
-  gameState?: GameStatus
+  gameState?: GameStatus,
+  skipDelay?: boolean
 ) => {
   const [visibleCardCount, setVisibleCardCount] = useState(0);
   const { calculatePlayerDelay, calculateDealerDelay } = useCardDelays();
@@ -24,14 +25,14 @@ export const useProgressiveTotal = (
       if (isPlayer) {
         // For players, schedule initial 2 cards with delays, show additional cards immediately
         cards.forEach((_, index) => {
-          if (index < 2) { 
-            // First 2 cards during initial dealing - use delays
+          if (index < 2 && !skipDelay) { 
+            // First 2 cards during initial dealing - use delays (unless skipDelay is true)
             const delay = calculatePlayerDelay(playerIndex || 0, index) * 1000;
             setTimeout(() => {
               setVisibleCardCount(prev => Math.max(prev, index + 1));
             }, delay);
           } else {
-            // Additional cards (hits/doubles) - show immediately
+            // Additional cards (hits/doubles) OR skipDelay is true - show immediately
             setVisibleCardCount(prev => Math.max(prev, index + 1));
           }
         });
@@ -60,7 +61,7 @@ export const useProgressiveTotal = (
         }
       }
     }
-  }, [isDealing, cards?.length, isPlayer, playerIndex]);
+  }, [isDealing, cards?.length, isPlayer, playerIndex, skipDelay]);
 
   // Calculate total based on visible cards using the same logic as Python backend
   const calculateHandValue = (hand: any[], alternate = false) => {

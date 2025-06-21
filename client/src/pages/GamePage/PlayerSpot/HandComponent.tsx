@@ -22,14 +22,15 @@ type PlayerComponentProps = {
   spotId: string;
   active: boolean;
   playerIndex?: number;
+  has_two_hands: boolean;
 };
 export const HandComponent: React.FC<PlayerComponentProps> = observer(
-  ({ hand, spotId, active, playerIndex = 0 }) => {
+  ({ hand, spotId, active, has_two_hands, playerIndex = 0, }) => {
 
     const cardRef = useRef<HTMLDivElement>(null);
     const activeClassName = active && hand.is_current_hand ? 'active' : '';
     const { calculatePlayerDelay } = useCardDelays();
-    const { getVisibleTotal } = useProgressiveTotal(hand.cards, true, playerIndex, game.table?.state);
+    const { getVisibleTotal } = useProgressiveTotal(hand.cards, true, playerIndex, game.table?.state, has_two_hands);
 
     const handleRemoveBet = useCallback(
       (index: number) => (e: MouseEvent<HTMLElement>) => {
@@ -66,7 +67,7 @@ export const HandComponent: React.FC<PlayerComponentProps> = observer(
               rank={card.rank}
               id={spotId}
               isNew={true}
-              animationDelay={calculatePlayerDelay(playerIndex, index)}
+              animationDelay={has_two_hands ? 0 : calculatePlayerDelay(playerIndex, index)}
             />
           ))}
           {getVisibleTotal().value > 0 && (
@@ -79,7 +80,7 @@ export const HandComponent: React.FC<PlayerComponentProps> = observer(
                     : ''
               }
             >
-              {(game.table?.state !== 'dealing' && game.table?.state !== 'accepting_bets') || !getVisibleTotal().alternate_value ? 
+              {(game.table?.state !== 'dealing' && game.table?.state !== 'accepting_bets') || !getVisibleTotal().alternate_value ?
                 getVisibleTotal().value :
                 `${getVisibleTotal().alternate_value}/${getVisibleTotal().value}`}
             </CardsTotal>

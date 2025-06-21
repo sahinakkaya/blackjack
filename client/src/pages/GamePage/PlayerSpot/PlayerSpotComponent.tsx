@@ -130,7 +130,12 @@ export const PlayerSpotComponent: React.FC<PlayerProps> = observer(({ id }) => {
                 key={`${idx}-player`}
                 className={handClass(hand)}
               >
-                <HandComponent hand={hand} spotId={`spot-${id}`} active={isActive && isCurrentPlayer} playerIndex={id} />
+                <HandComponent
+                  has_two_hands={player.hands.length === 2}
+                  hand={hand}
+                  spotId={`spot-${id}`}
+                  active={isActive && isCurrentPlayer}
+                  playerIndex={id} />
               </OnePlayerWrapper>
             ))}
         </PlayersWrapper>
