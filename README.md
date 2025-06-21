@@ -37,6 +37,7 @@ The frontend part is fork of [polivodichka/blackjack](https://github.com/polivod
 ### Future Plans
 - [x] Add a timer for player actions.
 - [ ] Allow users to skip round (i.e. they don't set bet and round still starts for other players)
+- [ ] Show each player's balance at their card spot
 - [ ] Add notifications for events like "Player joined," "Insufficient funds," and "Invalid game."
 - [ ] Allow players to top up their balance.
 - [ ] Implement chat functionality for players.
