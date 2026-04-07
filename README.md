@@ -1,5 +1,7 @@
 # Blackjack Game
 
+![](https://uptime.sahinakkaya.dev/api/badge/14/status)
+
 This repository contains the complete implementation of my multiplayer [Blackjack game](https://blackjack.sahinakkaya.dev), combining a Python-based backend with a React-based frontend. The whole thing was implemented in a week, so the codebase still contains unnecessary comments, test code etc. but it is functional as is. Below is an overview of the backend and frontend parts.
 
 
